@@ -1,5 +1,6 @@
-from tkinter import *
+import tkinter as tk
 import mysql.connector
+
 
 mydb = mysql.connector.connect(
     host = "localhost",
@@ -38,11 +39,38 @@ def delete_task():
 
 
 
-root = Tk()
+root = tk.Tk()
 root.title("Task Manager")
-root.geometry("800x700")
-task_label = Label(root,text="Task: " ,font=("Helvetica", 14))
-task_label.configure(fg="blue", bg="yellow")
-task_label.place(x =10,y=10)
+root.geometry("900x600")
+root.resizable(False, False)
+root.configure(bg="#E1E3E8")
+
+Label = tk.Label
+Button = tk.Button
+Listbox = tk.Listbox
+Entry = tk.Entry
+
+
+task_lbl = Label(root, text= "Task Manager",font=("Helvetica", 25, "italic"),bg="#E1E3E8")
+task_lbl.place(x=365,y=10)
+
+
+task_btn = Button(root, text="Add Task", bg="white", fg="black", font=("Trebuchet", 13), width=8, height=2 ,relief="flat" ,borderwidth=1)
+task_btn.place(x=700,y=200)
+
+
+task_name_lbl = Label(root,text = "Enter Task Name: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
+task_name_lbl.place(x=590, y=95)
+task_name_tb = Entry(root)
+task_name_tb.place(x=750, y=100)
+
+
+task_desc_lbl = Label(root,text = "Enter Task Description: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
+task_desc_lbl.place(x=570, y=140)
+task_desc_tb = Entry(root)
+task_desc_tb.place(x=750, y=145)
+
+
+
 
 root.mainloop()
