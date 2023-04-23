@@ -1,6 +1,8 @@
 import tkinter as tk
+from tkinter import *
 import mysql.connector
-
+from tkinter import font
+import tkinter.ttk as ttk
 
 mydb = mysql.connector.connect(
     host = "localhost",
@@ -11,30 +13,40 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 def add_task():
     task_name = task_name_tb.get()
-    task_description = task_description_tb.get()
+    task_desc = task_desc_tb.get()
     query = "INSERT INTO task_list (task, description) VALUES (%s, %s)"
-    value = (task_name, task_description)
+    value = (task_name, task_desc)
     mycursor.execute(query,value)
     mydb.commit()
-    task_list.insert(END,task_name)
+    task_box.insert(parent='', index='end', text=task_name, values=(task_name,))
+    task_box.insert(parent='',index='end',text=task_desc,values=(task_desc,))
+    task_name_tb.delete(0, END)
+    task_desc_tb.delete(0, END)
 
 def update_task():
-    task_name = task_name_tb.get()
-    task_description = task_description_tb.get()
-    query = "UPDATE task_list SET description = %s where task = %s"
-    value = (task_description,task_name)
-    mycursor.execute(query,value)
+    current_item = task_box.focus()
+    new_task = task_name_tb.get()
+    new_description = task_desc_tb.get()
+    mycursor = mydb.cursor()
+    sql = "UPDATE task_list SET task = %s, description = %s WHERE task = %s"
+    val = (new_task, new_description, task_box.item(current_item)['text'])
+    mycursor.execute(sql, val)
     mydb.commit()
-    task_list.delete(ACTIVE)
-    task_list.insert(ACTIVE,task_name)
+    task_box.item(current_item, text=new_task, values=(new_description,))
+    task_name_tb.delete(0, END)
+    task_desc_tb.delete(0, END)
 
 def delete_task():
-    task_name = task_name_tb.get()
-    query = "DELETE FROM task_list WHERE task = %s"
-    value = (task_name,)
-    mycursor.execute(query,value)
+    current_item = task_box.focus()
+    task_to_delete = task_box.item(current_item)['text']
+    mycursor = mydb.cursor()
+    sql = "DELETE FROM task_list WHERE task = %s"
+    val = (task_to_delete,)
+    mycursor.execute(sql, val)
     mydb.commit()
-    task_list.delete(ACTIVE)
+    task_box.delete(current_item)
+    task_name_tb.delete(0, END)
+    task_desc_tb.delete(0, END)
 
 
 
@@ -49,28 +61,38 @@ Label = tk.Label
 Button = tk.Button
 Listbox = tk.Listbox
 Entry = tk.Entry
-
+# font = tk.font
 
 task_lbl = Label(root, text= "Task Manager",font=("Helvetica", 25, "italic"),bg="#E1E3E8")
 task_lbl.place(x=365,y=10)
 
 
-task_btn = Button(root, text="Add Task", bg="white", fg="black", font=("Trebuchet", 13), width=8, height=2 ,relief="flat" ,borderwidth=1)
-task_btn.place(x=700,y=200)
+task_btn = Button(root, text="Add Task", bg="white", fg="black", font=("Trebuchet", 13), width=8, height=2 ,relief="flat" ,borderwidth=1 , command=add_task)
+task_btn.place(x=200,y=200)
 
 
-task_name_lbl = Label(root,text = "Enter Task Name: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
-task_name_lbl.place(x=590, y=95)
+task_name_lbl = Label(root,text = "Task Name: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
+task_name_lbl.place(x=20, y=95)
 task_name_tb = Entry(root)
-task_name_tb.place(x=750, y=100)
+task_name_tb.place(x=170, y=100)
 
 
-task_desc_lbl = Label(root,text = "Enter Task Description: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
-task_desc_lbl.place(x=570, y=140)
+task_desc_lbl = Label(root,text = "Task Description: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
+task_desc_lbl.place(x=20, y=140)
 task_desc_tb = Entry(root)
-task_desc_tb.place(x=750, y=145)
+task_desc_tb.place(x=170, y=145)
 
 
-
+task_box = ttk.Treeview(root, columns=("Name" , "Description"), selectmode="browse")
+task_box.column("#0", width=0, minwidth=0)
+task_box.heading("Description", text="Description")
+task_box.heading("Name", text="Name")
+task_box.column("Description", width=200, minwidth=200,anchor='center')
+task_box.column("Name", width=200, minwidth=200,anchor='center')
+task_box.place(x= 20,y=300)
+mycursor.execute("SELECT * FROM task_list")
+myresult = mycursor.fetchall()
+for task in myresult:
+    task_box.insert("", "end", values=(task[1],task[2]))
 
 root.mainloop()
