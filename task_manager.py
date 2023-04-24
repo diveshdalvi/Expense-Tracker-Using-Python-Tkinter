@@ -23,27 +23,28 @@ def add_task():
     task_desc_tb.delete(0, END)
 
 def update_task():
-    current_item = task_box.focus()
+    selected = task_box.focus()
+    temp = task_box.item(selected,'values')
     new_task = task_name_tb.get()
     new_description = task_desc_tb.get()
     mycursor = mydb.cursor()
     sql = "UPDATE task_list SET task = %s, description = %s WHERE task = %s"
-    val = (new_task, new_description, task_box.item(current_item)['text'])
+    val = (new_task, new_description, temp[0])
     mycursor.execute(sql, val)
     mydb.commit()
-    task_box.item(current_item, text=new_task, values=(new_description,))
+    task_box.item(selected,values=(temp[0],temp[1]))
     task_name_tb.delete(0, END)
     task_desc_tb.delete(0, END)
 
 def delete_task():
-    current_item = task_box.focus()
-    task_to_delete = task_box.item(current_item)['text']
+    selected = task_box.focus()
+    task_to_delete = task_box.item(selected,"values")
     mycursor = mydb.cursor()
     sql = "DELETE FROM task_list WHERE task = %s"
-    val = (task_to_delete,)
+    val = (task_to_delete)
     mycursor.execute(sql, val)
     mydb.commit()
-    task_box.delete(current_item)
+    task_box.delete(selected)
     task_name_tb.delete(0, END)
     task_desc_tb.delete(0, END)
 
@@ -66,8 +67,16 @@ task_lbl = Label(root, text= "Task Manager",font=("Helvetica", 25, "italic"),bg=
 task_lbl.place(x=365,y=10)
 
 
-task_btn = Button(root, text="Add Task", bg="white", fg="black", font=("Trebuchet", 13), width=8, height=2 ,relief="flat" ,borderwidth=1 , command=add_task)
-task_btn.place(x=200,y=200)
+add_task_btn = Button(root, text="Add Task", bg="white", fg="black", font=("Trebuchet", 13), width=8, height=2 ,relief="flat" ,borderwidth=1 , command=add_task)
+add_task_btn.place(x=200,y=200)
+
+
+update_task_btn = Button(root, text="Update Task", bg="white", fg="black", font=("Trebuchet", 13), width=10, height=2 ,relief="flat" ,borderwidth=1 , command=update_task)
+update_task_btn.place(x=300,y=200)
+
+
+delete_task_btn = Button(root, text="Delete Task", bg="red", fg="white", font=("Trebuchet", 13), width=9, height=2 ,relief="flat" ,borderwidth=1 , command=delete_task)
+delete_task_btn.place(x=450,y=200)
 
 
 task_name_lbl = Label(root,text = "Task Name: ",font= ("Helvetica", 12, "italic"),bg="#E1E3E8")
@@ -92,7 +101,12 @@ task_box.heading("Description",text="Description",anchor=CENTER)
 task_box.place(x= 20,y=300)
 mycursor.execute("SELECT * FROM task_list")
 myresult = mycursor.fetchall()
+
+
+
+
 for task in myresult:
     task_box.insert("", "end", values=(task[1],task[2]))
+
 
 root.mainloop()
