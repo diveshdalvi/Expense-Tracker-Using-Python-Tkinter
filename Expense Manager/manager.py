@@ -1,8 +1,7 @@
-import tkinter as tk
+from tkinter import *
 import mysql.connector
 import datetime
-
-
+import tkinter as tk
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -25,12 +24,48 @@ cnv.configure(bg='#CCF0F1')
 cnv.pack()
 
 def find_balance():
-    global current_amount
+
+    #Query For Current Amount
     query_for_remaining_balance = ("SELECT SUM(amount) AS current_amount FROM transaction;")
     mycursor.execute(query_for_remaining_balance)
     balance_result = mycursor.fetchone()
     current_amount = balance_result[0]
-    
+    #current balance text and amount text
+    #text
+    current_balance_txt_lbl = Label(text="Current Balance",bg='white',font=('futura',25))
+    current_balance_txt_lbl.place(x=80,y=55)
+    #balance
+    current_balance_lbl = Label(text=f"₹{current_amount}",bg='white',font=('Arial',21))
+    current_balance_lbl.place(x=175,y=110)
+
+
+    #Query For Expense Amount
+    query_for_expense_amount = ("SELECT SUM(amount) FROM transaction WHERE type = 'Expense';")
+    mycursor.execute(query_for_expense_amount)
+    expense_result = mycursor.fetchone()
+    expense_amount = expense_result[0]
+    expense_amount = expense_amount * -1
+    #expense text and expense balance text
+    #text
+    expense_text_lbl = Label(text="Expense",bg="white",font=("Arial",22,"bold"),fg="red")
+    expense_text_lbl.place(x=500,y=60)
+    expense_lbl = Label(text=f"₹{expense_amount}",bg='white',font=('Arial',21))
+    expense_lbl.place(x=536,y=105)
+
+    #Query for Income Amount
+    query_for_income_amount = ("SELECT SUM(amount) FROM transaction WHERE type = 'Income';")
+    mycursor.execute(query_for_income_amount)
+    income_result = mycursor.fetchone()
+    income_amount = income_result[0]
+
+    #income text and income balance text
+    #text
+    income_text_lbl = Label(text="Income",bg="white",font=("Arial",22,"bold"),fg="green")
+    income_text_lbl.place(x=680,y=60)
+    #balance
+    income_lbl = Label(text=f"₹{income_amount}",bg='white',font=('Arial',21))
+    income_lbl.place(x=706,y=105)
+
 
 #Functions
 def save_transaction():
@@ -68,54 +103,31 @@ def add_transaction():
     amount_text = cnv.create_text(470, y+20, anchor="w", text=f'₹{amount}', font=("Trebuchet", 22), fill="black")
     t_type_text_lbl = cnv.create_text(145, y+59, anchor="e", text=f"{transaction_type}", font=("Trebuchet", 17), fill="black")
     t_date_lbl = cnv.create_text(400, y+55, anchor="w", text=f"Date:{time}", font=("Trebuchet", 17), fill="black")
-
-
     transaction_rect = cnv.create_rectangle(50, y, 600, y+80, fill=t_box_color, outline="white")
     y+= 100
-
     cnv.lift(transaction_rect)
     cnv.lift(name_text)
     cnv.lift(amount_text)
     cnv.lift(t_type_text_lbl)
     cnv.lift(t_date_lbl)
-
     cnv.create_window(0, 0, anchor="nw",  width=270)
+    t_name.delete(0,END)
+    t_amount.delete(0,END)
 
+find_balance()
 def transaction():
     save_transaction()
     add_transaction()
     find_balance()
-find_balance()
+
 # main widget of canvas
 x1, y1 = 50, 40
 x2, y2 = 850, 180
 cnv.create_rectangle(x1,y1,x2,y2,fill="white",outline="")
 
-#current balance text and amount text
-#text
-current_balance_txt_lbl = Label(text="Current Balance",bg='white',font=('futura',25))
-current_balance_txt_lbl.place(x=80,y=55)
-#balance
-
-current_balance_lbl = Label(text=f"{current_amount}",bg='white',font=('Arial',21))
-current_balance_lbl.place(x=175,y=110)
-
-#expense text and expense balance text
-#text
-expense_text_lbl = Label(text="Expense",bg="white",font=("Arial",22,"bold"),fg="red")
-expense_text_lbl.place(x=500,y=60)
-#balance
-expense_lbl = Label(text="₹20",bg='white',font=('Arial',21))
-expense_lbl.place(x=536,y=105)
 
 
-#income text and income balance text
-#text
-income_text_lbl = Label(text="Income",bg="white",font=("Arial",22,"bold"),fg="green")
-income_text_lbl.place(x=680,y=60)
-#balance
-income_lbl = Label(text="₹50",bg='white',font=('Arial',21))
-income_lbl.place(x=706,y=105)
+
 
 # Data Entries 
 
